@@ -69,4 +69,4 @@ Este projeto é de caráter educacional e está licenciado sob a [MIT License](L
 
 ---
 
-**Desenvolvido por \[Seu Nome] como parte de estudos em Governança de Segurança da Informação.**
+**Desenvolvido por Elda Oliveira como parte de estudos em Governança de Segurança da Informação.**
