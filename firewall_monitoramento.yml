@@ -1,0 +1,44 @@
+- name: Hardening MySQL e Monitoramento no Windows
+  hosts: mysql_servers
+  gather_facts: yes
+  become: yes
+  become_method: runas
+  become_user: SYSTEM
+
+  tasks:
+    - name: Allow MySQL Internal
+      community.windows.win_firewall_rule:
+        name: "Allow MySQL Internal"
+        display_name: "Allow MySQL Internal"
+        enable: yes
+        direction: in
+        action: allow
+        protocol: TCP
+        local_port: "3306"
+        profile: Domain,Private,Public
+
+    - name: Block MySQL External
+      community.windows.win_firewall_rule:
+        name: "Block MySQL External"
+        display_name: "Block MySQL External"
+        enable: yes
+        direction: in
+        action: block
+        protocol: TCP
+        local_port: "3306"
+        remote_address: Any
+        profile: Domain,Private,Public
+
+    - name: Create or update scheduled task via schtasks
+      ansible.windows.win_shell: |
+        schtasks /Create /TN "MonitorMySQL" /TR "PowerShell.exe -ExecutionPolicy Bypass -File C:\success\alerta_mysql.ps1" /SC DAILY /ST 00:01 /RL HIGHEST /RU "NT AUTHORITY\SYSTEM" /F
+      args:
+        executable: cmd.exe
+
+    - name: Query scheduled task with schtasks
+      ansible.windows.win_shell: schtasks /Query /TN "MonitorMySQL" /FO LIST
+      register: monitor_task
+
+    - name: Show scheduled task output
+      ansible.builtin.debug:
+        var: monitor_task.stdout_lines
